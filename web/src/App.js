@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import api from './services/api';
+import DevItem from './components/DevItem'
+
 import './global.css';
 import './App.css';
 import './Sidebar.css';
-import './Main.css';
 
 function App() {
+  const [devs, setDevs] = useState([]);
+
   const [github_username, setGithubUsername] = useState('');
   const [techs, setTechs] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -26,17 +30,32 @@ function App() {
     )
   }, []);
 
+  loadDevs();
+
+  async function loadDevs() {
+    const response = await api.get('/devs');
+
+    setDevs(response.data);
+  }
+
   async function handleAddDev(e) {
     e.preventDefault();
-    
-
-  }
+    const response = await api.post('/devs', {
+      github_username,
+      techs,
+      latitude,
+      longitude
+    });
+    setGithubUsername('');
+    setTechs('');
+    loadDevs();
+  };
 
   return (
     <div id="app">
       <aside>
         <strong>Cadastrar</strong>
-        <form>
+        <form onSubmit={handleAddDev}>
           <div className="input-block">
             <label htmlFor="github_username">Usuário do GitHub</label>
             <input
@@ -85,50 +104,9 @@ function App() {
 
       <main>
         <ul>
-          <li className="dev-item">
-            <header>
-              <img alt="perfil_img" src="https://avatars1.githubusercontent.com/u/5282443?s=460&v=4" />
-              <div className="user-info">
-                <strong>Eduardo Amaral</strong>
-                <span>Java, React</span>
-              </div>
-            </header>
-            <p>Bacharel em Engenharia de Software.</p>
-            <a href="https://github.com/Eduardoamaral66">Acessar perfil no GitHub</a>
-          </li>
-          <li className="dev-item">
-            <header>
-              <img alt="perfil_img" src="https://avatars1.githubusercontent.com/u/5282443?s=460&v=4" />
-              <div className="user-info">
-                <strong>Eduardo Amaral</strong>
-                <span>Java, React</span>
-              </div>
-            </header>
-            <p>Bacharel em Engenharia de Software.</p>
-            <a href="https://github.com/Eduardoamaral66">Acessar perfil no GitHub</a>
-          </li>
-          <li className="dev-item">
-            <header>
-              <img alt="perfil_img" src="https://avatars1.githubusercontent.com/u/5282443?s=460&v=4" />
-              <div className="user-info">
-                <strong>Eduardo Amaral</strong>
-                <span>Java, React</span>
-              </div>
-            </header>
-            <p>Bacharel em Engenharia de Software.</p>
-            <a href="https://github.com/Eduardoamaral66">Acessar perfil no GitHub</a>
-          </li>
-          <li className="dev-item">
-            <header>
-              <img alt="perfil_img" src="https://avatars1.githubusercontent.com/u/5282443?s=460&v=4" />
-              <div className="user-info">
-                <strong>Eduardo Amaral</strong>
-                <span>Java, React</span>
-              </div>
-            </header>
-            <p>Bacharel em Engenharia de Software.</p>
-            <a href="https://github.com/Eduardoamaral66">Acessar perfil no GitHub</a>
-          </li>
+          {devs.map(dev => (
+            <DevItem key={dev._id} dev={dev} />
+          ))}
         </ul>
       </main>
     </div>
